@@ -5,16 +5,41 @@ import './App.css';
 import Routes from './Routes';
 import RouteNavItem from './components/RouteNavItem';
 
+import { CognitoUserPool, } from 'amazon-cognito-identity-js';
+import config from './config.js';
+
+
+
 class App extends Component {
 
   constructor(props) {
     super(props);
-  
+
     this.state = {
       userToken: null,
+      isLoadingUserToken: true,
     };
   }
-  
+
+  async componentDidMount() {
+    const currentUser = this.getCurrentUser();
+
+    if (currentUser === null) {
+      this.setState({ isLoadingUserToken: false });
+      return;
+    }
+
+    try {
+      const userToken = await this.getUserToken(currentUser);
+      this.updateUserToken(userToken);
+    }
+    catch (e) {
+      alert(e);
+    }
+
+    this.setState({ isLoadingUserToken: false });
+  }
+
   updateUserToken = (userToken) => {
     this.setState({
       userToken: userToken
@@ -30,6 +55,26 @@ class App extends Component {
     this.updateUserToken(null);
   }
 
+  getCurrentUser() {
+    const userPool = new CognitoUserPool({
+      UserPoolId: config.cognito.USER_POOL_ID,
+      ClientId: config.cognito.APP_CLIENT_ID
+    });
+    return userPool.getCurrentUser();
+  }
+
+  getUserToken(currentUser) {
+    return new Promise((resolve, reject) => {
+      currentUser.getSession(function (err, session) {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(session.getIdToken().getJwtToken());
+      });
+    });
+  }
+
   render() {
 
     const childProps = {
@@ -37,7 +82,11 @@ class App extends Component {
       updateUserToken: this.updateUserToken,
     };
 
-    return (
+    return ! this.state.isLoadingUserToken
+      && 
+      (
+
+
       <div className="App container">
 
         <Navbar fluid collapseOnSelect>
@@ -51,10 +100,10 @@ class App extends Component {
           <Navbar.Collapse>
             <Nav pullRight>
 
-              { this.state.userToken
+              {this.state.userToken
                 ? <NavItem onClick={this.handleLogout}>Logout</NavItem>
-                : [ <RouteNavItem key={1} onClick={this.handleNavLink} href="/signup">Signup</RouteNavItem>,
-                    <RouteNavItem key={2} onClick={this.handleNavLink} href="/login">Login</RouteNavItem> ] }
+                : [<RouteNavItem key={1} onClick={this.handleNavLink} href="/signup">Signup</RouteNavItem>,
+                <RouteNavItem key={2} onClick={this.handleNavLink} href="/login">Login</RouteNavItem>]}
 
             </Nav>
           </Navbar.Collapse>
