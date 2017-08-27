@@ -6,11 +6,12 @@ import NotFound from './containers/NotFound';
 import './containers/NotFound.css';
 import Login from './containers/Login';
 import './containers/Login.css';
+import AppliedRoute from './components/AppliedRoute';
 
-export default () => (
-  <Switch>
-    <Route path="/" exact component={Home} />
-    <Route path="/login" exact component={Login} />
-    <Route component={NotFound} />
-  </Switch>
-);
+export default ({ childProps }) => (
+    <Switch>
+      <AppliedRoute path="/" exact component={Home} props={childProps} />
+      <AppliedRoute path="/login" exact component={Login} props={childProps} />
+      <Route component={NotFound} />
+    </Switch>
+  );

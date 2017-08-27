@@ -7,12 +7,32 @@ import RouteNavItem from './components/RouteNavItem';
 
 class App extends Component {
 
+  constructor(props) {
+    super(props);
+  
+    this.state = {
+      userToken: null,
+    };
+  }
+  
+  updateUserToken = (userToken) => {
+    this.setState({
+      userToken: userToken
+    });
+  }
+
   handleNavLink = (event) => {
     event.preventDefault();
     this.props.history.push(event.currentTarget.getAttribute('href'));
   }
 
   render() {
+
+    const childProps = {
+      userToken: this.state.userToken,
+      updateUserToken: this.updateUserToken,
+    };
+
     return (
       <div className="App container">
 
@@ -33,7 +53,7 @@ class App extends Component {
 
         </Navbar>
 
-        <Routes />
+        <Routes childProps={childProps} />
 
       </div>
     );
