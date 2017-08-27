@@ -57,8 +57,10 @@ class App extends Component {
     if(currentUser !== null) {
       currentUser.signOut();
     }
-    
+
     this.updateUserToken(null);
+
+    this.props.history.push('/login');
   }
 
   getCurrentUser() {
